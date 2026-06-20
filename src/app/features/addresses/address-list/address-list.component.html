@@ -198,18 +198,18 @@
 
             <th
               class="col-sortable"
-              [class.col-active]="sortField() === 'JobName'"
-              (click)="applySort('JobName')"
+              [class.col-active]="sortField() === 'Job'"
+              (click)="applySort('Job')"
             >
-              Job <span [class]="sortIconClass('JobName')"></span>
+              Job <span [class]="sortIconClass('Job')"></span>
             </th>
 
             <th
               class="col-sortable"
-              [class.col-active]="sortField() === 'DepartmentName'"
-              (click)="applySort('DepartmentName')"
+              [class.col-active]="sortField() === 'Department'"
+              (click)="applySort('Department')"
             >
-              Department <span [class]="sortIconClass('DepartmentName')"></span>
+              Department <span [class]="sortIconClass('Department')"></span>
             </th>
 
             <th>Mobile</th>
@@ -222,13 +222,7 @@
               Email <span [class]="sortIconClass('Email')"></span>
             </th>
 
-            <th
-              class="col-sortable col-narrow"
-              [class.col-active]="sortField() === 'Age'"
-              (click)="applySort('Age')"
-            >
-              Age <span [class]="sortIconClass('Age')"></span>
-            </th>
+            <th class="col-narrow">Age</th>
 
             <th class="col-actions">Actions</th>
           </tr>

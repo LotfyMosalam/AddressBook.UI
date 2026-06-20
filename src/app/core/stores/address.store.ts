@@ -252,8 +252,8 @@ export class AddressStore {
         address: this._address() || undefined,
         jobId: this._jobId() || undefined,
         departmentId: this._departmentId() || undefined,
-        dobFrom: this._dobFrom() || undefined,
-        dobTo: this._dobTo() || undefined,
+        dobFrom: AddressStore.isCompleteDate(this._dobFrom()) ? this._dobFrom() : undefined,
+        dobTo: AddressStore.isCompleteDate(this._dobTo()) ? this._dobTo() : undefined,
       };
       return this.addressesService.search(params);
     }
@@ -265,6 +265,12 @@ export class AddressStore {
       sortDescending: this._sortDesc(),
     };
     return this.addressesService.getAll(params);
+  }
+
+  private static isCompleteDate(dateStr: string): boolean {
+    if (!dateStr) return false;
+    const year = parseInt(dateStr.split('-')[0], 10);
+    return !isNaN(year) && year >= 1000;
   }
 
   private removeOptimistic(entryId: string): void {
