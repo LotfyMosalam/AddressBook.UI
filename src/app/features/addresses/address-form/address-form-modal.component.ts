@@ -4,8 +4,9 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { of, switchMap, catchError } from 'rxjs';
+import { of, switchMap, catchError, tap, filter, map, finalize } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AddressStore } from '../../../core/stores/address.store';
 import { LookupStore } from '../../../core/stores/lookup.store';
@@ -62,9 +63,13 @@ export class AddressFormModalComponent {
   readonly isLoadingEntry = signal(false);
   readonly isSaving = signal(false);
   readonly showPassword = signal(false);
+  readonly uploadProgress = signal(0);
   selectedPhoto: File | null = null;
   readonly photoPreview = signal<string | null>(null);
   readonly currentPhotoUrl = signal<string | null>(null);
+
+  private static readonly ALLOWED_PHOTO_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  private static readonly MAX_PHOTO_SIZE = 5 * 1024 * 1024;
 
   // ── Password hints (signals updated via valueChanges) ─────────────────────
   private readonly passwordValue = signal('');
@@ -189,8 +194,20 @@ export class AddressFormModalComponent {
   }
 
   onPhotoSelect(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
     if (!file) return;
+
+    if (!AddressFormModalComponent.ALLOWED_PHOTO_TYPES.includes(file.type)) {
+      this.toast.error('Only JPG, PNG, and WebP images are allowed.');
+      return;
+    }
+    if (file.size > AddressFormModalComponent.MAX_PHOTO_SIZE) {
+      this.toast.error('Image must be 5 MB or less.');
+      return;
+    }
+
     this.selectedPhoto = file;
     const reader = new FileReader();
     reader.onload = () => this.photoPreview.set(reader.result as string);
@@ -253,14 +270,7 @@ export class AddressFormModalComponent {
     };
     return this.addressStore.createEntry(req).pipe(
       switchMap((newId) =>
-        this.selectedPhoto
-          ? this.addressStore.uploadPhoto(newId, this.selectedPhoto).pipe(
-              catchError(() => {
-                this.toast.info('Contact created. Photo upload failed — add it later.');
-                return of(null);
-              }),
-            )
-          : of(null),
+        this.selectedPhoto ? this.uploadWithProgress$(newId, this.selectedPhoto) : of(null),
       ),
     );
   }
@@ -279,14 +289,31 @@ export class AddressFormModalComponent {
     return this.addressStore.updateEntry(this.data.entryId!, req).pipe(
       switchMap(() =>
         this.selectedPhoto
-          ? this.addressStore.uploadPhoto(this.data.entryId!, this.selectedPhoto).pipe(
-              catchError(() => {
-                this.toast.info('Contact updated. Photo upload failed — update it later.');
-                return of(null);
-              }),
-            )
+          ? this.uploadWithProgress$(this.data.entryId!, this.selectedPhoto)
           : of(null),
       ),
+    );
+  }
+
+  private uploadWithProgress$(id: string, file: File) {
+    return this.addressStore.uploadPhotoWithProgress(id, file).pipe(
+      tap((event) => {
+        if (event.type === HttpEventType.UploadProgress) {
+          const total = event.total ?? 1;
+          this.uploadProgress.set(Math.round((event.loaded / total) * 100));
+        }
+      }),
+      filter((event): event is HttpResponse<{ photoUrl: string }> =>
+        event.type === HttpEventType.Response,
+      ),
+      map(() => null as null),
+      catchError((err: ApiError) => {
+        const action = this.isCreate ? 'Contact created' : 'Contact updated';
+        const reason = err.message ? `: ${err.message}` : '';
+        this.toast.info(`${action}. Photo upload failed${reason} — add it later.`);
+        return of(null);
+      }),
+      finalize(() => this.uploadProgress.set(0)),
     );
   }
 }

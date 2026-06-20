@@ -44,16 +44,16 @@ export class AddressesService {
     return this.api.delete<void>(`${this.path}/${id}`);
   }
 
-  uploadPhoto(id: string, file: File): Observable<string> {
+  uploadPhoto(id: string, file: File): Observable<{ photoUrl: string }> {
     const formData = new FormData();
     formData.append('photo', file);
-    return this.api.postFormData<string>(`${this.path}/${id}/photo`, formData);
+    return this.api.postFormData<{ photoUrl: string }>(`${this.path}/${id}/photo`, formData);
   }
 
-  uploadPhotoWithProgress(id: string, file: File): Observable<HttpEvent<string>> {
+  uploadPhotoWithProgress(id: string, file: File): Observable<HttpEvent<{ photoUrl: string }>> {
     const formData = new FormData();
     formData.append('photo', file);
-    return this.api.postFormDataWithProgress<string>(`${this.path}/${id}/photo`, formData);
+    return this.api.postFormDataWithProgress<{ photoUrl: string }>(`${this.path}/${id}/photo`, formData);
   }
 
   exportToExcel(): Observable<Blob> {

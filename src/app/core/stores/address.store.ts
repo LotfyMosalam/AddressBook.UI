@@ -216,11 +216,11 @@ export class AddressStore {
 
   // ── Photo ──────────────────────────────────────────────────────────────────
 
-  uploadPhoto(id: string, file: File): Observable<string> {
+  uploadPhoto(id: string, file: File): Observable<{ photoUrl: string }> {
     return this.addressesService.uploadPhoto(id, file);
   }
 
-  uploadPhotoWithProgress(id: string, file: File): Observable<HttpEvent<string>> {
+  uploadPhotoWithProgress(id: string, file: File): Observable<HttpEvent<{ photoUrl: string }>> {
     return this.addressesService.uploadPhotoWithProgress(id, file);
   }
 

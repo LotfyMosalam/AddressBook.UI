@@ -44,7 +44,12 @@
         @if (selectedPhoto) {
           <span class="photo-name">{{ selectedPhoto.name }}</span>
         } @else {
-          <span class="photo-hint">JPG, PNG or WebP</span>
+          <span class="photo-hint">JPG, PNG or WebP · max 5 MB</span>
+        }
+        @if (uploadProgress() > 0) {
+          <div class="photo-upload-progress">
+            <div class="photo-upload-progress-bar" [style.width.%]="uploadProgress()"></div>
+          </div>
         }
       </div>
     </div>
@@ -199,7 +204,11 @@
     <button type="button" class="btn-save" (click)="save()" [disabled]="isSaving()">
       @if (isSaving()) {
         <span class="btn-spinner"></span>
-        Saving…
+        @if (uploadProgress() > 0) {
+          Uploading {{ uploadProgress() }}%…
+        } @else {
+          Saving…
+        }
       } @else {
         {{ isCreate ? 'Add Contact' : 'Save Changes' }}
       }

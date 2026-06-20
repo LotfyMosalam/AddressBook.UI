@@ -268,8 +268,8 @@ export class AddressListComponent implements OnInit {
           } else if (httpEvent.type === HttpEventType.Response) {
             this.uploadingId.set(null);
             this.uploadProgress.set(0);
-            const result = httpEvent.body as unknown as { photoUrl: string };
-            if (result?.photoUrl) this.store.patchEntryPhoto(entryId, result.photoUrl);
+            const photoUrl = httpEvent.body?.photoUrl;
+            if (photoUrl) this.store.patchEntryPhoto(entryId, photoUrl);
             this.toast.success('Photo updated.');
           }
         },
