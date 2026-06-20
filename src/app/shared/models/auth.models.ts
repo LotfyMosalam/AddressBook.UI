@@ -1,5 +1,3 @@
-export type UserRole = 'Admin' | 'User';
-
 export interface AuthResponseDto {
   userId: string;
   token: string;
@@ -15,5 +13,4 @@ export interface LoginRequest {
 export interface RegisterRequest {
   email: string;
   password: string;
-  role: UserRole;
 }

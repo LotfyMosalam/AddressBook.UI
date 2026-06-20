@@ -4,7 +4,6 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthStore } from '../../../core/stores/auth.store';
 import { ApiError } from '../../../core/services/base-api.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { UserRole } from '../../../shared/models/auth.models';
 import { authPasswordValidator, passwordMatchValidator } from '../../../shared/utils/validators';
 
 @Component({
@@ -28,7 +27,6 @@ export class RegisterComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8), authPasswordValidator]],
       confirmPassword: ['', [Validators.required]],
-      role: this.fb.control<UserRole>('User', { validators: [Validators.required] }),
     },
     { validators: passwordMatchValidator('password', 'confirmPassword') },
   );
@@ -92,9 +90,9 @@ export class RegisterComponent {
       return;
     }
     this.isLoading.set(true);
-    const { email, password, role } = this.form.getRawValue();
+    const { email, password } = this.form.getRawValue();
 
-    this.authStore.register({ email, password, role }).subscribe({
+    this.authStore.register({ email, password }).subscribe({
       next: () => {
         this.isLoading.set(false);
         this.toast.success('Account created! Welcome to Address Book.');
