@@ -1,0 +1,39 @@
+<header class="navbar">
+
+  <!-- Hamburger (mobile only) -->
+  <button
+    class="hamburger"
+    (click)="sidebarToggle.emit()"
+    aria-label="Toggle navigation"
+    type="button"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  </button>
+
+  <div class="spacer"></div>
+
+  <!-- User info + logout -->
+  <div class="user-area">
+
+    @if (user()) {
+      <div class="user-meta">
+        <div class="avatar">{{ user()!.email[0].toUpperCase() }}</div>
+        <div class="user-details">
+          <span class="user-email">{{ user()!.email }}</span>
+          <span class="user-role">{{ user()!.role }}</span>
+        </div>
+      </div>
+    }
+
+    <button class="logout-btn" (click)="logout()" type="button">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+      </svg>
+      <span>Logout</span>
+    </button>
+
+  </div>
+
+</header>

@@ -1,0 +1,209 @@
+<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<div class="modal-header">
+  <h2 class="modal-title">{{ isCreate ? 'Add Contact' : 'Edit Contact' }}</h2>
+  <button type="button" class="close-btn" (click)="close()" [disabled]="isSaving()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  </button>
+</div>
+
+<!-- ── Loading entry (edit mode only) ────────────────────────────────────── -->
+@if (isLoadingEntry()) {
+  <div class="modal-body">
+    <div class="entry-loading">
+      <div class="spinner"></div>
+      <p>Loading contact details…</p>
+    </div>
+  </div>
+} @else {
+
+  <!-- ── Body ────────────────────────────────────────────────────────────── -->
+  <div class="modal-body" [formGroup]="form">
+
+    <!-- Photo -->
+    <div class="photo-row">
+      <div class="photo-preview">
+        @if (getDisplayPhoto()) {
+          <img [src]="getDisplayPhoto()!" class="photo-img" alt="Preview" />
+        } @else {
+          <span class="photo-fallback">
+            <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="20" cy="15" r="7" />
+              <path d="M4 38c0-8.837 7.163-16 16-16s16 7.163 16 16" />
+            </svg>
+          </span>
+        }
+      </div>
+      <div class="photo-meta">
+        <label class="btn-photo">
+          {{ selectedPhoto ? 'Change Photo' : 'Choose Photo' }}
+          <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onPhotoSelect($event)" hidden />
+        </label>
+        @if (selectedPhoto) {
+          <span class="photo-name">{{ selectedPhoto.name }}</span>
+        } @else {
+          <span class="photo-hint">JPG, PNG or WebP</span>
+        }
+      </div>
+    </div>
+
+    <!-- Full Name -->
+    <div class="field">
+      <label class="field-label" for="fullName">Full Name <span class="req">*</span></label>
+      <input
+        id="fullName"
+        type="text"
+        class="field-input"
+        formControlName="fullName"
+        [class.is-invalid]="fullNameError"
+        placeholder="e.g. Ahmed Mahmoud"
+        autocomplete="name"
+      />
+      @if (fullNameError) { <span class="field-error">{{ fullNameError }}</span> }
+    </div>
+
+    <!-- Job + Department -->
+    <div class="field-row-2">
+      <div class="field">
+        <label class="field-label" for="jobId">Job <span class="req">*</span></label>
+        <select
+          id="jobId"
+          class="field-input"
+          formControlName="jobId"
+          [class.is-invalid]="jobError"
+        >
+          <option value="">— Select Job —</option>
+          @for (job of lookupStore.jobs(); track job.id) {
+            <option [value]="job.id">{{ job.name }}</option>
+          }
+        </select>
+        @if (jobError) { <span class="field-error">{{ jobError }}</span> }
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="departmentId">Department <span class="req">*</span></label>
+        <select
+          id="departmentId"
+          class="field-input"
+          formControlName="departmentId"
+          [class.is-invalid]="deptError"
+        >
+          <option value="">— Select Department —</option>
+          @for (dept of lookupStore.departments(); track dept.id) {
+            <option [value]="dept.id">{{ dept.name }}</option>
+          }
+        </select>
+        @if (deptError) { <span class="field-error">{{ deptError }}</span> }
+      </div>
+    </div>
+
+    <!-- Email + Mobile -->
+    <div class="field-row-2">
+      <div class="field">
+        <label class="field-label" for="email">Email <span class="req">*</span></label>
+        <input
+          id="email"
+          type="email"
+          class="field-input"
+          formControlName="email"
+          [class.is-invalid]="emailError"
+          placeholder="example@domain.com"
+          autocomplete="email"
+        />
+        @if (emailError) { <span class="field-error">{{ emailError }}</span> }
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="mobileNumber">Mobile Number <span class="req">*</span></label>
+        <input
+          id="mobileNumber"
+          type="tel"
+          class="field-input"
+          formControlName="mobileNumber"
+          [class.is-invalid]="mobileError"
+          placeholder="01XXXXXXXXX"
+          autocomplete="tel"
+        />
+        @if (mobileError) { <span class="field-error">{{ mobileError }}</span> }
+      </div>
+    </div>
+
+    <!-- Date of Birth + Password (create only) -->
+    <div class="field-row-2">
+      <div class="field">
+        <label class="field-label" for="dateOfBirth">Date of Birth <span class="req">*</span></label>
+        <input
+          id="dateOfBirth"
+          type="date"
+          class="field-input"
+          formControlName="dateOfBirth"
+          [class.is-invalid]="dobError"
+        />
+        @if (dobError) { <span class="field-error">{{ dobError }}</span> }
+      </div>
+
+      @if (isCreate) {
+        <div class="field">
+          <label class="field-label" for="password">Password <span class="req">*</span></label>
+          <div class="pw-wrapper">
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              class="field-input"
+              formControlName="password"
+              [class.is-invalid]="passwordError"
+              placeholder="Min 8 characters"
+              autocomplete="new-password"
+            />
+            <button type="button" class="pw-toggle" (click)="showPassword.set(!showPassword())">
+              {{ showPassword() ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+          @if (passwordError) {
+            <span class="field-error">{{ passwordError }}</span>
+          } @else if (showPasswordHints) {
+            <div class="pw-hints">
+              <span [class.hint-met]="hasUppercase()">A–Z</span>
+              <span [class.hint-met]="hasLowercase()">a–z</span>
+              <span [class.hint-met]="hasDigit()">0–9</span>
+              <span [class.hint-met]="hasMinLength()">8+ chars</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Address -->
+    <div class="field">
+      <label class="field-label" for="address">Address <span class="req">*</span></label>
+      <textarea
+        id="address"
+        class="field-input field-textarea"
+        formControlName="address"
+        [class.is-invalid]="addressError"
+        placeholder="Street, City…"
+        rows="3"
+      ></textarea>
+      @if (addressError) { <span class="field-error">{{ addressError }}</span> }
+    </div>
+
+  </div>
+
+  <!-- ── Footer ───────────────────────────────────────────────────────────── -->
+  <div class="modal-footer">
+    <button type="button" class="btn-cancel" (click)="close()" [disabled]="isSaving()">
+      Cancel
+    </button>
+    <button type="button" class="btn-save" (click)="save()" [disabled]="isSaving()">
+      @if (isSaving()) {
+        <span class="btn-spinner"></span>
+        Saving…
+      } @else {
+        {{ isCreate ? 'Add Contact' : 'Save Changes' }}
+      }
+    </button>
+  </div>
+
+}

@@ -1,0 +1,104 @@
+<div class="auth-page">
+  <div class="auth-card">
+
+    <header class="auth-header">
+      <div class="auth-icon">📒</div>
+      <h1>Create Account</h1>
+      <p>Join the Address Book today</p>
+    </header>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+      <!-- Email -->
+      <div class="form-field" [class.field--error]="emailError">
+        <label for="email">Email Address</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="you@example.com"
+          autocomplete="email"
+        />
+        @if (emailError) {
+          <p class="field-error">{{ emailError }}</p>
+        }
+      </div>
+
+      <!-- Role -->
+      <div class="form-field">
+        <label for="role">Account Role</label>
+        <div class="select-wrapper">
+          <select id="role" formControlName="role">
+            <option value="User">User</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="form-field" [class.field--error]="passwordError">
+        <label for="password">Password</label>
+        <div class="input-group">
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Min. 8 characters"
+            autocomplete="new-password"
+          />
+          <button
+            type="button"
+            class="toggle-visibility"
+            (click)="showPassword.set(!showPassword())"
+            tabindex="-1"
+            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+          >
+            {{ showPassword() ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+        @if (passwordError) {
+          <p class="field-error">{{ passwordError }}</p>
+        }
+        @if (showPasswordHints) {
+          <ul class="password-hints">
+            <li [class.hint--met]="hasMinLength">At least 8 characters</li>
+            <li [class.hint--met]="hasUppercase">One uppercase letter (A–Z)</li>
+            <li [class.hint--met]="hasLowercase">One lowercase letter (a–z)</li>
+            <li [class.hint--met]="hasDigit">One digit (0–9)</li>
+          </ul>
+        }
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="form-field" [class.field--error]="confirmPasswordError">
+        <label for="confirmPassword">Confirm Password</label>
+        <input
+          id="confirmPassword"
+          type="password"
+          formControlName="confirmPassword"
+          placeholder="Repeat your password"
+          autocomplete="new-password"
+        />
+        @if (confirmPasswordError) {
+          <p class="field-error">{{ confirmPasswordError }}</p>
+        }
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="isLoading()">
+        @if (isLoading()) {
+          <span class="spinner" aria-hidden="true"></span>
+          Creating account…
+        } @else {
+          Create Account
+        }
+      </button>
+
+    </form>
+
+    <p class="auth-switch">
+      Already have an account?
+      <a routerLink="/auth/login">Sign in</a>
+    </p>
+
+  </div>
+</div>

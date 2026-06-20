@@ -1,0 +1,61 @@
+:host {
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-header {
+  padding: 1.375rem 1.5rem 0;
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.dialog-body {
+  padding: 0.75rem 1.5rem 0;
+}
+
+.dialog-message {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #4b5563;
+  line-height: 1.65;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.625rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.btn-cancel {
+  padding: 0.5rem 1.125rem;
+  background: #f1f5f9;
+  color: #374151;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: #e2e8f0; }
+}
+
+.btn-confirm {
+  padding: 0.5rem 1.125rem;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: #dc2626; }
+}

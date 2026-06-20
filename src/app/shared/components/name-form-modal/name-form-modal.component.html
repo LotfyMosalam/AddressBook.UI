@@ -1,0 +1,30 @@
+<div class="modal-header">
+  <h2 class="modal-title">{{ isCreate ? 'Add' : 'Edit' }} {{ data.entityLabel }}</h2>
+  <button class="btn-close" type="button" (click)="cancel()" aria-label="Close">✕</button>
+</div>
+
+<form class="modal-body" [formGroup]="form" (ngSubmit)="save()">
+  <div class="field-group">
+    <label class="field-label" for="name-input">
+      Name <span class="required">*</span>
+    </label>
+    <input
+      id="name-input"
+      class="field-input"
+      [class.has-error]="nameError"
+      formControlName="name"
+      [placeholder]="placeholder()"
+      autocomplete="off"
+    />
+    @if (nameError) {
+      <span class="error-msg">{{ nameError }}</span>
+    }
+  </div>
+</form>
+
+<div class="modal-footer">
+  <button class="btn-cancel" type="button" (click)="cancel()">Cancel</button>
+  <button class="btn-save" type="submit" (click)="save()">
+    {{ isCreate ? 'Add' : 'Save Changes' }}
+  </button>
+</div>

@@ -1,0 +1,319 @@
+<input
+  #photoUploadInput
+  type="file"
+  accept=".jpg,.jpeg,.png,.webp"
+  style="display:none"
+  (change)="onPhotoFileSelected($event)"
+/>
+
+<div class="page-header">
+  <div class="page-title">
+    <h1>Address Book</h1>
+    @if (!isLoading() && !errorMsg()) {
+      <span class="count-badge">{{ totalCount() }} contact{{ totalCount() !== 1 ? 's' : '' }}</span>
+    }
+  </div>
+  <div class="header-actions">
+    <button
+      class="btn-export"
+      [disabled]="isExporting()"
+      (click)="exportToExcel()"
+    >
+      @if (isExporting()) {
+        <span class="export-spinner"></span>
+        Exporting…
+      } @else {
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" width="15" height="15">
+          <path d="M10 3v10M6 9l4 4 4-4"/>
+          <path d="M3 15h14" stroke-linecap="round"/>
+        </svg>
+        Export Excel
+      }
+    </button>
+    <button class="btn-add" (click)="openCreateModal()">+ Add Contact</button>
+  </div>
+</div>
+
+<!-- ── Filter Panel ─────────────────────────────────────────────────────────── -->
+<div class="filter-panel" [formGroup]="filterForm">
+
+  <!-- Top row: global search + reset -->
+  <div class="filter-top-row">
+    <div class="search-field">
+      <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75">
+        <circle cx="8.5" cy="8.5" r="5.5" />
+        <line x1="13" y1="13" x2="18" y2="18" />
+      </svg>
+      <input
+        type="search"
+        formControlName="searchTerm"
+        placeholder="Quick search — name, email, mobile, address…"
+        autocomplete="off"
+      />
+    </div>
+
+    @if (isSearchActive()) {
+      <button class="btn-reset" type="button" (click)="clearFilters()">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" width="14" height="14">
+          <path d="M15 5L5 15M5 5l10 10"/>
+        </svg>
+        Reset Filters
+      </button>
+    }
+  </div>
+
+  <!-- Filter grid: specific field filters -->
+  <div class="filter-grid">
+
+    <div class="filter-field">
+      <label class="filter-label">Full Name</label>
+      <input type="text" formControlName="fullName" placeholder="e.g. Ahmed Hassan" autocomplete="off" />
+    </div>
+
+    <div class="filter-field">
+      <label class="filter-label">Email</label>
+      <input type="text" formControlName="email" placeholder="e.g. ahmed@example.com" autocomplete="off" />
+    </div>
+
+    <div class="filter-field">
+      <label class="filter-label">Mobile</label>
+      <input type="text" formControlName="mobileNumber" placeholder="e.g. 01012345678" autocomplete="off" />
+    </div>
+
+    <div class="filter-field">
+      <label class="filter-label">Address</label>
+      <input type="text" formControlName="address" placeholder="e.g. Cairo, Giza…" autocomplete="off" />
+    </div>
+
+    <div class="filter-field">
+      <label class="filter-label">Job</label>
+      <select formControlName="jobId">
+        <option value="">All Jobs</option>
+        @for (job of lookupStore.jobs(); track job.id) {
+          <option [value]="job.id">{{ job.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-field">
+      <label class="filter-label">Department</label>
+      <select formControlName="departmentId">
+        <option value="">All Departments</option>
+        @for (dept of lookupStore.departments(); track dept.id) {
+          <option [value]="dept.id">{{ dept.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-field">
+      <label class="filter-label">Date of Birth From</label>
+      <input type="date" formControlName="dobFrom" />
+    </div>
+
+    <div class="filter-field">
+      <label class="filter-label">Date of Birth To</label>
+      <input type="date" formControlName="dobTo" />
+    </div>
+
+  </div>
+
+  @if (isSearchActive()) {
+    <div class="active-filters-hint">
+      Showing filtered results &mdash; <button class="link-btn" (click)="clearFilters()">clear all filters</button>
+    </div>
+  }
+
+</div>
+
+<!-- ── Data Card ───────────────────────────────────────────────────────────── -->
+<div class="content-card">
+
+  @if (isLoading()) {
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-photo">Photo</th>
+            <th>Full Name</th>
+            <th>Job</th>
+            <th>Department</th>
+            <th>Mobile</th>
+            <th>Email</th>
+            <th class="col-narrow">Age</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of skeletonRows; track $index) {
+            <tr class="skeleton-row">
+              <td><div class="skeleton-circle"></div></td>
+              <td><div class="skeleton-line" style="width: 65%"></div></td>
+              <td><div class="skeleton-line" style="width: 55%"></div></td>
+              <td><div class="skeleton-line" style="width: 60%"></div></td>
+              <td><div class="skeleton-line" style="width: 70%"></div></td>
+              <td><div class="skeleton-line" style="width: 75%"></div></td>
+              <td><div class="skeleton-line" style="width: 40%"></div></td>
+              <td></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  } @else if (errorMsg()) {
+    <div class="state-container">
+      <div class="state-icon error-icon">⚠</div>
+      <p class="state-title">Something went wrong</p>
+      <p class="state-desc">{{ errorMsg() }}</p>
+      <button class="btn-retry" (click)="retry()">Try Again</button>
+    </div>
+
+  } @else if (isEmpty()) {
+    <div class="state-container">
+      <div class="state-icon">📋</div>
+      <p class="state-title">No contacts found</p>
+      @if (isSearchActive()) {
+        <p class="state-desc">No contacts match your current filters. Try adjusting or clearing them.</p>
+        <button class="btn-clear-filters" (click)="clearFilters()">Clear Filters</button>
+      } @else {
+        <p class="state-desc">Get started by adding your first contact.</p>
+        <button class="btn-add-empty" (click)="openCreateModal()">Add Contact</button>
+      }
+    </div>
+
+  } @else {
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-photo">Photo</th>
+
+            <th
+              class="col-sortable"
+              [class.col-active]="sortField() === 'FullName'"
+              (click)="applySort('FullName')"
+            >
+              Full Name <span [class]="sortIconClass('FullName')"></span>
+            </th>
+
+            <th
+              class="col-sortable"
+              [class.col-active]="sortField() === 'JobName'"
+              (click)="applySort('JobName')"
+            >
+              Job <span [class]="sortIconClass('JobName')"></span>
+            </th>
+
+            <th
+              class="col-sortable"
+              [class.col-active]="sortField() === 'DepartmentName'"
+              (click)="applySort('DepartmentName')"
+            >
+              Department <span [class]="sortIconClass('DepartmentName')"></span>
+            </th>
+
+            <th>Mobile</th>
+
+            <th
+              class="col-sortable"
+              [class.col-active]="sortField() === 'Email'"
+              (click)="applySort('Email')"
+            >
+              Email <span [class]="sortIconClass('Email')"></span>
+            </th>
+
+            <th
+              class="col-sortable col-narrow"
+              [class.col-active]="sortField() === 'Age'"
+              (click)="applySort('Age')"
+            >
+              Age <span [class]="sortIconClass('Age')"></span>
+            </th>
+
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of entries(); track entry.id) {
+            <tr>
+              <td class="col-photo">
+                <div
+                  class="photo-upload-trigger"
+                  [class.photo-is-uploading]="uploadingId() === entry.id"
+                  (click)="triggerPhotoUpload(entry.id)"
+                  title="Click to update photo"
+                >
+                  <img
+                    class="entry-photo"
+                    [src]="getPhotoUrl(entry.photoUrl)"
+                    [alt]="entry.fullName"
+                    (error)="onPhotoError($event)"
+                  />
+                  @if (uploadingId() === entry.id) {
+                    <div class="photo-progress-overlay">
+                      <svg
+                        class="progress-ring"
+                        viewBox="0 0 36 36"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <circle class="progress-track" cx="18" cy="18" r="15.9" />
+                        <circle
+                          class="progress-fill"
+                          cx="18" cy="18" r="15.9"
+                          [style.stroke-dashoffset]="100 - uploadProgress()"
+                        />
+                      </svg>
+                      <span class="progress-pct">{{ uploadProgress() }}%</span>
+                    </div>
+                  } @else {
+                    <div class="photo-hover-hint">📷</div>
+                  }
+                </div>
+              </td>
+              <td class="name-cell">{{ entry.fullName }}</td>
+              <td>{{ entry.jobName }}</td>
+              <td>{{ entry.departmentName }}</td>
+              <td class="mono-cell">{{ entry.mobileNumber }}</td>
+              <td class="email-cell">{{ entry.email }}</td>
+              <td class="age-cell">{{ entry.age }}</td>
+              <td class="actions-cell">
+                <a [routerLink]="['/addresses', entry.id]" class="action-btn action-view">View</a>
+                <button class="action-btn action-edit" (click)="openEditModal(entry.id)">Edit</button>
+                <button class="action-btn action-delete" (click)="openDeleteConfirm(entry.id, entry.fullName)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination-bar">
+      <span class="pagination-info">
+        Showing <strong>{{ pageStart() }}</strong>&ndash;<strong>{{ pageEnd() }}</strong>
+        of <strong>{{ totalCount() }}</strong>
+      </span>
+
+      <div class="pagination-controls">
+        <button class="page-btn" [disabled]="!hasPrevPage()" (click)="goToPage(pageNum() - 1)">
+          ← Prev
+        </button>
+        <span class="page-indicator">{{ pageNum() }} / {{ totalPages() }}</span>
+        <button class="page-btn" [disabled]="!hasNextPage()" (click)="goToPage(pageNum() + 1)">
+          Next →
+        </button>
+      </div>
+
+      <div class="page-size-control">
+        <label>Show</label>
+        <select (change)="onPageSizeChange($event)">
+          <option value="5" [selected]="pageSz() === 5">5</option>
+          <option value="10" [selected]="pageSz() === 10">10</option>
+          <option value="25" [selected]="pageSz() === 25">25</option>
+          <option value="50" [selected]="pageSz() === 50">50</option>
+        </select>
+        <span>per page</span>
+      </div>
+    </div>
+  }
+
+</div>

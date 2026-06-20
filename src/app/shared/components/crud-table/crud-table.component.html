@@ -1,0 +1,77 @@
+<div class="page-header">
+  <div class="page-title">
+    <h1>{{ title() }}</h1>
+    @if (!isLoading() && !errorMsg()) {
+      <span class="count-badge">{{ items().length }}</span>
+    }
+  </div>
+  <button class="btn-add" (click)="addClicked.emit()">+ {{ addLabel() }}</button>
+</div>
+
+<div class="content-card">
+
+  @if (isLoading()) {
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-num">#</th>
+            <th>Name</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of skeletonRows; track $index) {
+            <tr class="skeleton-row">
+              <td><div class="skeleton-line" style="width: 24px"></div></td>
+              <td><div class="skeleton-line" style="width: 55%"></div></td>
+              <td></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  } @else if (errorMsg()) {
+    <div class="state-container">
+      <div class="state-icon">⚠</div>
+      <p class="state-title">Something went wrong</p>
+      <p class="state-desc">{{ errorMsg() }}</p>
+      <button class="btn-retry" (click)="retryClicked.emit()">Try Again</button>
+    </div>
+
+  } @else if (isEmpty()) {
+    <div class="state-container">
+      <div class="state-icon">📋</div>
+      <p class="state-title">No {{ title() }} yet</p>
+      <p class="state-desc">Get started by adding your first entry.</p>
+      <button class="btn-add-empty" (click)="addClicked.emit()">{{ addLabel() }}</button>
+    </div>
+
+  } @else {
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-num">#</th>
+            <th>Name</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id; let i = $index) {
+            <tr>
+              <td class="num-cell">{{ i + 1 }}</td>
+              <td class="name-cell">{{ item.name }}</td>
+              <td class="actions-cell">
+                <button class="action-btn action-edit" (click)="editClicked.emit(item.id)">Edit</button>
+                <button class="action-btn action-delete" (click)="deleteClicked.emit(item)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+</div>

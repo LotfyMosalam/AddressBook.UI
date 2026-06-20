@@ -1,0 +1,17 @@
+<div class="layout" [class.sidebar-open]="sidebarOpen()">
+
+  <!-- Mobile overlay -->
+  <div class="overlay" (click)="closeSidebar()" aria-hidden="true"></div>
+
+  <!-- Sidebar -->
+  <app-sidebar [open]="sidebarOpen()" />
+
+  <!-- Content area -->
+  <div class="main-area">
+    <app-navbar (sidebarToggle)="toggleSidebar()" />
+    <main class="page-content">
+      <router-outlet />
+    </main>
+  </div>
+
+</div>
