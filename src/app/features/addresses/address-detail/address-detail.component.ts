@@ -66,14 +66,14 @@ export class AddressDetailComponent {
 
   getPhotoUrl(): string {
     const url = this.entry()?.photoUrl;
-    if (!url) return 'assets/default-avatar.svg';
+    if (!url) return 'default-avatar.svg';
     if (url.startsWith('http') || url.startsWith('//')) return url;
     return `${this.staticBase}${url}`;
   }
 
   onPhotoError(event: Event): void {
     const img = event.target as HTMLImageElement;
-    img.src = 'assets/default-avatar.svg';
+    img.src = 'default-avatar.svg';
     img.onerror = null;
   }
 

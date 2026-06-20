@@ -156,14 +156,14 @@ export class AddressListComponent implements OnInit {
   // ── Photo helpers ──────────────────────────────────────────────────────────
 
   getPhotoUrl(photoUrl: string | undefined): string {
-    if (!photoUrl) return 'assets/default-avatar.svg';
+    if (!photoUrl) return 'default-avatar.svg';
     if (photoUrl.startsWith('http') || photoUrl.startsWith('//')) return photoUrl;
     return `${this.staticBase}${photoUrl}`;
   }
 
   onPhotoError(event: Event): void {
     const img = event.target as HTMLImageElement;
-    img.src = 'assets/default-avatar.svg';
+    img.src = 'default-avatar.svg';
     img.onerror = null;
   }
 
